@@ -28,15 +28,16 @@
   "dependencies": {
     "@stencil/core": "^2.13.0",
     "@stencil/sass": "^2.0.2",
-    "google-maps": "^4.3.3",
     "x2js": "^3.4.4"
   },
   "devDependencies": {
+    "@types/express": "^4.17.15",
     "@types/jest": "^27.0.3",
+    "@types/node": "^18.11.18",
+    "fetch-no-cors": "^1.0.13",
     "jest": "^27.4.5",
     "jest-cli": "^27.4.5",
-    "puppeteer": "^10.0.0",
-    "xml2json": "^0.12.0"
+    "puppeteer": "^10.0.0"
   },
   "license": "MIT"
 }

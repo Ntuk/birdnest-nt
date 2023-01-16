@@ -6,12 +6,17 @@ export function writePilotInformationToLocalStorage(pilotId: string, pilotInfo: 
 }
 
 export function readPilotDataFromLocalStorage(pilotId: string): Pilot {
-  return JSON.parse(localStorage.getItem(pilotId)!);
+  const pilot = JSON.parse(localStorage.getItem(pilotId)!);
+  if (pilot) {
+    return pilot
+  }
 }
 
 export function readAllExistingPilotDataFromLocalStorage(): Pilot[] {
   const allPilotIds = Object.keys(localStorage);
-  return allPilotIds.map(pilotId => JSON.parse(localStorage.getItem(pilotId)));
+  if (allPilotIds) {
+    return allPilotIds.map(pilotId => JSON.parse(localStorage.getItem(pilotId)));
+  }
 }
 
 export function removePilotDataFromLocalStorage(pilotId: string): void {

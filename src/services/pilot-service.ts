@@ -1,14 +1,23 @@
 import { Pilot } from '../models/pilot-model';
+import fetchNoCors from 'fetch-no-cors';
 
 export class PilotService {
   public static async getPilots(serialNumber: string): Promise<Pilot> {
-    const response = await fetch(`https://assignments.reaktor.com/birdnest/pilots/${serialNumber}`, { method: 'GET' })
-      .then(response => response.json())
+    const proxyUrl = 'https://mysterious-hollows-95764.herokuapp.com/';
+    const endpointUrl = `https://assignments.reaktor.com/birdnest/pilots/${serialNumber}`;
+    const options = { method: 'GET' }
 
-    if (response) {
-      return response as Pilot;
-    } else {
-      return null;
+    const pilotResponse = async (endpointUrl, options, CORS_ANYWHERE) => {
+      const response = await fetchNoCors(endpointUrl, options, CORS_ANYWHERE);
+      if (response.status === 200) {
+        return response.json() as Pilot;
+      } else {
+        // TODO: improve error handling
+        console.error('Error occurred')
+      }
     }
+
+    return await pilotResponse(endpointUrl, options, proxyUrl);
   }
 }
+
