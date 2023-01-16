@@ -14,9 +14,14 @@ export function readPilotDataFromLocalStorage(pilotId: string): Pilot {
 
 export function readAllExistingPilotDataFromLocalStorage(): Pilot[] {
   const allPilotIds = Object.keys(localStorage);
+  let pilots: Pilot[] = [];
   if (allPilotIds) {
-    return allPilotIds.map(pilotId => JSON.parse(localStorage.getItem(pilotId)));
+    pilots = allPilotIds.map((pilotId: string) => JSON.parse(localStorage.getItem(pilotId)));
   }
+  pilots.forEach((pilot: Pilot) => {
+    isOlderThanTenMinutes(pilot.violationTimestamp) ? this.removePilotDataFromLocalStorage(pilot.pilotId) : null;
+  });
+  return pilots;
 }
 
 export function removePilotDataFromLocalStorage(pilotId: string): void {

@@ -31,7 +31,7 @@ export class Birdnest {
         this.checkForViolations(captureTimestamp);
         this.sortPilotsByLastSeen();
       })
-    }, 5000); // 10 seconds
+    }, 5000); // 5 seconds
   }
 
   public componentWillLoad(): void {
