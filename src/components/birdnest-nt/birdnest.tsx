@@ -36,6 +36,7 @@ export class Birdnest {
 
   public componentWillLoad(): void {
     this.storedPilots = readAllExistingPilotDataFromLocalStorage();
+    this.checkForExpiredPilotData();
     this.sortPilotsByLastSeen();
   }
 
