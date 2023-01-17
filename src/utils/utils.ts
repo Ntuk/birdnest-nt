@@ -13,9 +13,12 @@ export function readPilotDataFromLocalStorage(pilotId: string): Pilot {
 }
 
 export function readAllExistingPilotDataFromLocalStorage(): Pilot[] {
-  const allPilotIds = Object.keys(localStorage);
+  const allPilotIds: string[] = Object.keys(localStorage);
   if (allPilotIds) {
-    return allPilotIds.map((pilotId: string) => JSON.parse(localStorage.getItem(pilotId)));
+    let allPilots: Pilot[];
+    allPilots = allPilotIds.map((pilotId: string) => JSON.parse(localStorage.getItem(pilotId)));
+    allPilots.filter((pilot: Pilot) => isOlderThanTenMinutes(pilot.violationTimestamp));
+    return allPilots;
   }
 }
 
@@ -32,7 +35,7 @@ export function calculateDistanceFromCenter(coordinates: Coordinates): number {
   return distance / 1000;
 }
 
-export function timeSince(violationTimestamp) {
+export function timeSince(violationTimestamp: Date) {
   const currentTime = new Date();
   const difference = currentTime.valueOf() - new Date(violationTimestamp).valueOf();
   const secondsSince = Math.floor(difference / 1000);
