@@ -65,19 +65,19 @@ export class Birdnest {
           {
             this.storedPilots.map(pilot => {
               return (
-                <tr class={'tooltip'}>
+                <tr>
                   <td>{pilot.firstName + ' ' + pilot.lastName}</td>
                   <td>{pilot.email}</td>
                   <td>{pilot.phoneNumber}</td>
                   <td>{pilot.closestDistance + ' meters'}</td>
-                  <td class={'tooltiptext'}>{timeSince(pilot.lastSeen)}</td>
+                  <td>{timeSince(pilot.lastSeen)}</td>
                 </tr>
               )
             })
           }
-          <tr class={'copyright'}>
+          <tr class={'footer'}>
             <th colSpan={5}>
-              <a target={'_blank'} href={'https://www.nicotukiainen.com'}>© Nico Tukiainen 2022</a>
+              <a target={'_blank'} href={'https://www.nicotukiainen.com'}>© Nico Tukiainen 2023</a>
             </th>
           </tr>
           </table>
