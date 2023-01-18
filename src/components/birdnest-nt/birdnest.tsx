@@ -5,7 +5,6 @@ import { PilotService } from '../../services/pilot-service';
 import { Pilot } from '../../models/pilot-model';
 import {
   calculateDistanceFromCenter,
-  isOlderThanTenMinutes,
   timeSince,
 } from '../../utils/utils';
 import { FirebaseService } from '../../services/firebase-service';
@@ -34,7 +33,6 @@ export class Birdnest {
 
   public async componentWillLoad(): Promise<void> {
     this.storedPilots = await FirebaseService.readAllPilotDataFromFirebase();
-    this.checkForExpiredPilotData();
     this.sortPilotsByLastSeen();
   }
 
@@ -88,7 +86,7 @@ export class Birdnest {
     return await DroneService.getDrones();
   }
 
-  private checkForViolations(captureTimestamp: string): void {
+  private async checkForViolations(captureTimestamp: string): Promise<void> {
     this.capturedDrones.forEach((drone: Drone) => {
       const distanceFromCenter: number = calculateDistanceFromCenter({ x: drone.positionX, y: drone.positionY });
       if (distanceFromCenter < 100) {
@@ -99,7 +97,8 @@ export class Birdnest {
         );
       }
     });
-    this.checkForExpiredPilotData();
+    this.storedPilots = await FirebaseService.readAllPilotDataFromFirebase();
+    this.sortPilotsByLastSeen();
   }
 
   private async getViolatingPilotInfo(serialNumber: string, closestDistance: number, captureTimestamp: string): Promise<Pilot> {
@@ -114,19 +113,6 @@ export class Birdnest {
       const newViolatingPilot = await FirebaseService.readPilotDataFromFirebase(violatingPilot.pilotId);
       this.storedPilots = [...this.storedPilots, newViolatingPilot];
     }
-  }
-
-  private checkForExpiredPilotData(): void {
-    this.storedPilots.forEach((pilot: Pilot) => {
-      if (pilot.violationTimestamp) {
-        isOlderThanTenMinutes(pilot.violationTimestamp.toDate()) ? this.removeExpiredPilot(pilot.pilotId) : null;
-      }
-    });
-  }
-
-  private async removeExpiredPilot(pilotId: string): Promise<void> {
-    this.storedPilots = this.storedPilots.filter((storedPilot: Pilot) => storedPilot.pilotId !== pilotId);
-    await FirebaseService.deletePilotFromFirebase(pilotId);
   }
 
   private sortPilotsByLastSeen(): void {

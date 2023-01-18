@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { deleteDoc, getDocs, getFirestore } from "firebase/firestore";
-import { collection, doc, addDoc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, getDocs, doc, getFirestore } from "firebase/firestore";
 import { Pilot } from '../models/pilot-model';
 import { Env } from '@stencil/core';
+import { isOlderThanTenMinutes } from '../utils/utils';
 
 const firebaseConfig = {
   apiKey: Env.API_KEY,
@@ -30,13 +30,17 @@ export class FirebaseService {
 
   static async readPilotDataFromFirebase(pilotId: string): Promise<Pilot> {
     const querySnapshot = await getDocs(collection(db, "pilots"));
-    let pilot: Pilot;
-    querySnapshot.forEach(doc => {
-      if (doc.data().pilotId === pilotId) {
-        pilot = doc.data() as Pilot;
+    let pilotFromDb: Pilot;
+    querySnapshot.forEach(pilot => {
+      if (isOlderThanTenMinutes(pilot.data().violationTimestamp.toDate())) {
+        const docRef = doc(db, "pilots", pilot.id);
+        FirebaseService.deletePilotFromFirebase(docRef);
+      }
+      if (pilot.data().pilotId === pilotId) {
+        pilotFromDb = pilot.data() as Pilot;
       }
     })
-    return pilot as Pilot;
+    return pilotFromDb as Pilot;
   }
 
   static postPilotDataToFirebase(pilotData: Pilot): void {
@@ -49,11 +53,11 @@ export class FirebaseService {
         pilotId: pilotData.pilotId,
         closestDistance: pilotData.closestDistance,
         violationTimestamp: pilotData.violationTimestamp,
-        lastSeen: pilotData.lastSeen
+        lastSeen: pilotData.lastSeen,
       });
   }
 
-  static async deletePilotFromFirebase(pilotId: string): Promise<void> {
-    await deleteDoc(doc(db, "pilots", pilotId));
+  static async deletePilotFromFirebase(docRef: any): Promise<void> {
+    await deleteDoc(docRef);
   }
 }

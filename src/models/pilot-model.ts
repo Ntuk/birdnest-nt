@@ -8,6 +8,6 @@ export class Pilot {
     public pilotId: string,
     public closestDistance?: number,
     public violationTimestamp?: any,
-    public lastSeen?: any
+    public lastSeen?: any,
   ) {}
 }
