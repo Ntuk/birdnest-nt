@@ -7,7 +7,7 @@ export class Pilot {
     public phoneNumber: string,
     public pilotId: string,
     public closestDistance?: number,
-    public violationTimestamp?: Date,
+    public violationTimestamp?: any,
     public lastSeen?: any
   ) {}
 }

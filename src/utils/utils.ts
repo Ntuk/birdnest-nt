@@ -1,30 +1,4 @@
-import { Pilot } from '../models/pilot-model';
 import { Coordinates } from '../types/types';
-
-export function writePilotInformationToLocalStorage(pilotId: string, pilotInfo: Pilot): void {
-  localStorage.setItem(pilotId, JSON.stringify(pilotInfo));
-}
-
-export function readPilotDataFromLocalStorage(pilotId: string): Pilot {
-  const pilot = JSON.parse(localStorage.getItem(pilotId)!);
-  if (pilot) {
-    return pilot
-  }
-}
-
-export function readAllExistingPilotDataFromLocalStorage(): Pilot[] {
-  const allPilotIds: string[] = Object.keys(localStorage);
-  if (allPilotIds) {
-    let allPilots: Pilot[];
-    allPilots = allPilotIds.map((pilotId: string) => JSON.parse(localStorage.getItem(pilotId)));
-    allPilots.filter((pilot: Pilot) => isOlderThanTenMinutes(pilot.violationTimestamp));
-    return allPilots;
-  }
-}
-
-export function removePilotDataFromLocalStorage(pilotId: string): void {
-  localStorage.removeItem(pilotId);
-}
 
 export function calculateDistanceFromCenter(coordinates: Coordinates): number {
   const center: Coordinates = { x: 250000, y: 250000 };
@@ -35,9 +9,10 @@ export function calculateDistanceFromCenter(coordinates: Coordinates): number {
   return distance / 1000;
 }
 
-export function timeSince(violationTimestamp: Date) {
+export function timeSince(violationTimestamp: any) {
+  const ts = violationTimestamp.toDate();
   const currentTime = new Date();
-  const difference = currentTime.valueOf() - new Date(violationTimestamp).valueOf();
+  const difference = currentTime.valueOf() - new Date(ts).valueOf();
   const secondsSince = Math.floor(difference / 1000);
   const minutesSince = Math.trunc(secondsSince / 60);
 

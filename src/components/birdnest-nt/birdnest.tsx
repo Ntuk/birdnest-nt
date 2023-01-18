@@ -6,11 +6,9 @@ import { Pilot } from '../../models/pilot-model';
 import {
   calculateDistanceFromCenter,
   isOlderThanTenMinutes,
-  readAllExistingPilotDataFromLocalStorage,
-  readPilotDataFromLocalStorage,
-  removePilotDataFromLocalStorage, timeSince,
-  writePilotInformationToLocalStorage,
+  timeSince,
 } from '../../utils/utils';
+import { FirebaseService } from '../../services/firebase-service';
 
 @Component({
   tag: 'birdnest-nt',
@@ -31,11 +29,11 @@ export class Birdnest {
         this.checkForViolations(captureTimestamp);
         this.sortPilotsByLastSeen();
       })
-    }, 5000); // 5 seconds
+    }, 7000); // 7 seconds
   }
 
-  public componentWillLoad(): void {
-    this.storedPilots = readAllExistingPilotDataFromLocalStorage();
+  public async componentWillLoad(): Promise<void> {
+    this.storedPilots = await FirebaseService.readAllPilotDataFromFirebase();
     this.checkForExpiredPilotData();
     this.sortPilotsByLastSeen();
   }
@@ -112,29 +110,26 @@ export class Birdnest {
     if (this.storedPilots.length > 0 && this.storedPilots.some((pilot: Pilot) => pilot.pilotId === violatingPilot.pilotId)) {
       return
     } else {
-      writePilotInformationToLocalStorage(violatingPilot.pilotId, violatingPilot);
-      this.storedPilots = [...this.storedPilots, (readPilotDataFromLocalStorage(violatingPilot.pilotId))];
+      FirebaseService.postPilotDataToFirebase(violatingPilot);
+      const newViolatingPilot = await FirebaseService.readPilotDataFromFirebase(violatingPilot.pilotId);
+      this.storedPilots = [...this.storedPilots, newViolatingPilot];
     }
   }
 
   private checkForExpiredPilotData(): void {
     this.storedPilots.forEach((pilot: Pilot) => {
       if (pilot.violationTimestamp) {
-        isOlderThanTenMinutes(pilot.violationTimestamp) ? this.removeExpiredPilot(pilot.pilotId) : null;
+        isOlderThanTenMinutes(pilot.violationTimestamp.toDate()) ? this.removeExpiredPilot(pilot.pilotId) : null;
       }
     });
   }
 
-  private removeExpiredPilot(pilotId: string): void {
-    this.storedPilots.filter(storedPilot => storedPilot.pilotId !== pilotId);
-    const expiredPilot = this.storedPilots.findIndex((pilot: Pilot) => pilot.pilotId === pilotId);
-    if (expiredPilot > -1) {
-      this.storedPilots.splice(expiredPilot, 1);
-    }
-    removePilotDataFromLocalStorage(pilotId);
+  private async removeExpiredPilot(pilotId: string): Promise<void> {
+    this.storedPilots = this.storedPilots.filter((storedPilot: Pilot) => storedPilot.pilotId !== pilotId);
+    await FirebaseService.deletePilotFromFirebase(pilotId);
   }
 
   private sortPilotsByLastSeen(): void {
-    this.storedPilots.sort((a: Pilot, b: Pilot) => a.lastSeen.localeCompare(b.lastSeen));
+    this.storedPilots.sort((a: Pilot, b: Pilot) => a.lastSeen - b.lastSeen)
   }
 }
